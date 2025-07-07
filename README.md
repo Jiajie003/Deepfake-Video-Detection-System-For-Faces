@@ -9,16 +9,16 @@ A Flask-based web app that lets users upload a video and checks its authenticity
 ```bash
 FYP_DeepFake/
 ├── dataset/ ← raw Celeb-DF videos downloaded via Google Form
-├── Train_Model/
+├── Train Model/
 │ ├── frames/ ← extracted frames output
 │ │ ├── real/ ← subfolders, each with 20 extracted frames from a real video
 │ │ └── fake/ ← subfolders, each with 20 extracted frames from a fake video
 │ ├── extract_face_frames_224x224_20frames.py
 │ ├── generate_train_index_fixed_path.py
-│ ├── self_train/
+│ ├── self train/
 │ │ ├── split_train_val.py ← unbalanced split
 │ │ └── train_index.json
-│ ├── new_train/
+│ ├── new train/
 │ │ └── split_train_val_balance.py
 │ └── Train_And_Eval_Unbalanced.py
 ├── create_db.py
@@ -52,7 +52,7 @@ FYP_DeepFake/
 ## 🛠️ Environment Setup
 
 ```bash
-git clone https://github.com/your-username/Deepfake-Video-Detection-System-For-Faces.git
+git clone https://github.com/Jiajie003/Deepfake-Video-Detection-System-For-Faces.git
 cd Deepfake-Video-Detection-System-For-Faces
 python -m venv env
 # Windows:
@@ -108,7 +108,7 @@ Verify that the printed PyTorch version includes +cu118 or +cu121 and that CUDA 
 ## 🚀 Training the Model
 1. Extract 20 face-focused frames per video
 ```bash
-cd Train_Model
+cd Train Model
 python extract_face_frames_224x224_20frames.py \
   --input ../dataset/ \
   --output ./frames/
@@ -119,12 +119,12 @@ python extract_face_frames_224x224_20frames.py \
 ```bash
 python generate_train_index_fixed_path.py \
   --frames_dir ./frames/ \
-  --output ./self_train/train_index.json
+  --output ./self train/train_index.json
 ```
 
 ## 3. Split into unbalanced train/validation sets
 ```bash
-cd self_train
+cd self train
 python split_train_val.py \
   --index train_index.json \
   --train_out train_split.json \
@@ -134,9 +134,9 @@ python split_train_val.py \
 
 ## 4. Create a balanced split
 ```bash
-cd ../new_train
+cd ../new train
 python split_train_val_balance.py \
-  --index ../self_train/train_index.json \
+  --index ../self train/train_index.json \
   --train_out train_split_balanced.json \
   --val_out val_split_balanced.json
 ```
@@ -145,11 +145,31 @@ python split_train_val_balance.py \
 ```bash
 cd ..
 python Train_And_Eval_Unbalanced.py \
-  --train_json self_train/train_split.json \
+  --train_json self train/train_split.json \
   --val_json self_train/val_split.json \
   --save_model best_unbalanced_model.pth
 ```
 ---
+
+### 🔑 Generate a Gmail App Password
+1. Go to your Google Account’s security settings:  
+   https://myaccount.google.com/security  
+2. Under **“Signing in to Google”**, click **App passwords**.  
+3. You may be prompted to re-enter your Google password or complete 2-step verification.  
+4. In the **“Select app”** dropdown choose **Mail**, and in **“Select device”** choose **Other (Custom name)**.  
+5. Enter a name (e.g. `DeepfakeApp`) and click **Generate**.  
+6. Google will show you a 16-character password. Copy it.  
+7. Paste that password into your `.env` as the value for `MAIL_PASSWORD`:
+```ini
+MAIL_USERNAME='your.email@gmail.com'
+MAIL_PASSWORD='your_16_character_app_password'
+```
+
+---
+
+This will guide anyone through creating and using a Gmail App Password for your Flask-Mail setup.
+
+
 ## 🌐 Running the Web App
 1. Initialize the database
 ```bash

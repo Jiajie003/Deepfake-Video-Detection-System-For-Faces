@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deepfake Detection Result</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <style>
+        .scroll-row {
+            overflow-x: auto;
+            white-space: nowrap;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .scroll-row img {
+            height: 150px;
+            margin-right: 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+        .confidence {
+            font-size: 16px;
+            color: #555;
+        }
+        .fake {
+            color: red;
+            font-weight: bold;
+        }
+        .real {
+            color: green;
+            font-weight: bold;
+        }
+        .back-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            display: inline-block;
+        }
+        .back-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">Deepfake Detection</a>
+    </div>
+</nav>
+
+<div class="container mt-5">
+    <h2 class="text-center">Analysis Results</h2>
+    <p class="text-center">The video has been analyzed. Below are the details:</p>
+
+    <div class="text-center mb-4">
+        {% if results %}
+            <p class="confidence"><strong>Confidence:</strong> {{ results[0].confidence | round(2) }}</p>
+            <p class="{% if results[0].result == 'Fake' %}fake{% else %}real{% endif %}">
+                <strong>{{ results[0].result }}</strong>
+            </p>
+        {% endif %}
+    </div>
+
+    <h5>🧠 Detection Frames</h5>
+    <div class="scroll-row">
+        {% for image_path in face_images %}
+            <img src="{{ image_path }}">
+        {% endfor %}
+    </div>
+
+    <h5>🎯 Cropped Faces</h5>
+    <div class="scroll-row">
+        {% for image_path in crop_faces %}
+            <img src="{{ image_path }}">
+        {% endfor %}
+    </div>
+
+    <h5>🎥 Preview Video</h5>
+    <div class="text-center">
+        <!-- <video width="480" height="auto" controls>
+            <source src="{{ url_for('uploaded_file', unique_folder_name=preview_path.split('/')[0], subfolder='', filename=preview_path.split('/')[-1]) }}" type="video/mp4">
+            Your browser does not support the video tag.
+        </video> -->
+        <video width="480" height="auto" controls>
+            <source src="{{ preview_path }}" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+
+    <div class="text-center">
+        <a href="{{ url_for('home') }}" class="back-button">Back to Home</a>
+    </div>
+</div>
+</body>
+</html>

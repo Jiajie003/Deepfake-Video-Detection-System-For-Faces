@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ 'Login' if request.args.get('action') == 'login' else 'Register' }}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        .password-checklist {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .password-checklist span {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .valid {
+            color: green;
+        }
+        .invalid {
+            color: red;
+        }
+        .password-toggle {
+            position: absolute;
+            right: 10px;
+            top: 60%;
+            cursor: pointer;
+        }
+        .position-relative {
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">Deepfake Detection</a>
+    </div>
+</nav>
+
+<div class="container mt-5" style="max-width: 450px;">
+    <h2 class="text-center">
+        {{ 'Login' if request.args.get('action') == 'login' else 'Register' }}
+    </h2>
+
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div class="alert alert-warning mt-3">
+        {{ messages[0] }}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <form action="{{ url_for('auth') }}?action={{ request.args.get('action', 'register') }}" method="post">
+        <input type="hidden" name="action" value="{{ request.args.get('action', 'register') }}">
+
+        <div class="mb-3">
+            <label for="username" class="form-label">User ID</label>
+            <input type="text" class="form-control" id="username" name="username"
+                   value="{{ request.form.get('username', '') }}" required>
+        </div>
+
+        {% if request.args.get('action') != 'login' %}
+        <div class="mb-3">
+            <label for="email" class="form-label">Email Address</label>
+            <input type="email" class="form-control" id="email" name="email"
+                   value="{{ request.form.get('email', '') }}" required>
+        </div>
+        {% endif %}
+
+        <div class="mb-3 position-relative">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" name="password" required onkeydown="return noSpace(event)">
+            <i class="fa-solid fa-eye password-toggle" onclick="toggleVisibility('password', this)" onkeypress="return isAllowedCharacter(event)"></i>
+        </div>
+
+
+        {% if request.args.get('action') != 'login' %}
+        <div class="password-checklist" id="password-rules">
+            <span id="length" class="invalid">❌ At least 8 characters</span>
+            <span id="upper" class="invalid">❌ One uppercase letter</span>
+            <span id="lower" class="invalid">❌ One lowercase letter</span>
+            <span id="digit" class="invalid">❌ One number</span>
+        </div>
+
+        <div class="mb-3 position-relative">
+            <label for="confirm_password" class="form-label">Confirm Password</label>
+            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+            <i class="fa-solid fa-eye password-toggle" onclick="toggleVisibility('confirm_password', this)" onkeypress="return isAllowedCharacter(event)"></i>
+        </div>
+        {% endif %}
+
+        <button type="submit" class="btn btn-primary w-100">
+            {{ 'Login' if request.args.get('action') == 'login' else 'Register' }}
+        </button>
+    </form>
+
+    <p class="text-center mt-3">
+        {% if request.args.get('action') == 'login' %}
+            Don't have an account? <a href="{{ url_for('auth') }}">Register here</a>
+        </p>
+        <p class="text-center mt-2">
+            Haven't verified your email? <a href="{{ url_for('verify') }}">Click here</a>
+        </p>
+        {% else %}
+            Already have an account? <a href="{{ url_for('auth', action='login') }}">Login here</a>
+        </p>
+        {% endif %}
+
+</div>
+
+<script>
+    const passwordInput = document.getElementById("password");
+    const lengthRule = document.getElementById("length");
+    const upperRule = document.getElementById("upper");
+    const lowerRule = document.getElementById("lower");
+    const digitRule = document.getElementById("digit");
+
+    passwordInput.addEventListener("input", function () {
+        const val = passwordInput.value;
+        lengthRule.className = val.length >= 8 ? "valid" : "invalid";
+        upperRule.className = /[A-Z]/.test(val) ? "valid" : "invalid";
+        lowerRule.className = /[a-z]/.test(val) ? "valid" : "invalid";
+        digitRule.className = /[0-9]/.test(val) ? "valid" : "invalid";
+
+        lengthRule.innerHTML = (val.length >= 8 ? "✅" : "❌") + " At least 8 characters";
+        upperRule.innerHTML = (/[A-Z]/.test(val) ? "✅" : "❌") + " One uppercase letter";
+        lowerRule.innerHTML = (/[a-z]/.test(val) ? "✅" : "❌") + " One lowercase letter";
+        digitRule.innerHTML = (/[0-9]/.test(val) ? "✅" : "❌") + " One number";
+    });
+
+    function toggleVisibility(id, icon) {
+        const field = document.getElementById(id);
+        const type = field.type === "password" ? "text" : "password";
+        const ctype = field.type === "confirm_password" ? "text" : "confirm_password";
+        field.type = type;
+        icon.classList.toggle("fa-eye");
+        icon.classList.toggle("fa-eye-slash");
+    }
+
+    function noSpace(e) {
+        return e.key !== ' ';
+    }
+
+    function isAllowedCharacter(event) {
+    const key = event.key;
+    const isValidChar = /^[A-Za-z0-9]$/.test(key);
+
+    // 只允许单字符输入（跳过 Shift、Enter 等）
+    if (key.length === 1 && !isValidChar) {
+        event.preventDefault();
+        return false;
+    }
+    return true;
+    }
+
+    let clickedButton = null;
+
+    document.querySelectorAll('button[type="submit"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+        clickedButton = btn;
+    });
+    });
+
+    document.querySelector('form').addEventListener('submit', function () {
+    if (clickedButton) {
+        clickedButton.disabled = true;
+        clickedButton.innerText = "Processing...";
+    }
+    });
+    
+</script>
+
+
+</body>
+</html>

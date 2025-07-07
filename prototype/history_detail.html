@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>History Detail</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <style>
+        .scroll-row {
+            overflow-x: auto;
+            white-space: nowrap;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .scroll-row img {
+            height: 150px;
+            margin-right: 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            cursor: pointer;
+        }
+        .fake {
+            color: red;
+            font-weight: bold;
+        }
+        .real {
+            color: green;
+            font-weight: bold;
+        }
+        .modal-img {
+            max-height: 70vh;
+            max-width: 100%;
+            display: block;
+            margin: 0 auto;
+        }
+        .modal-body {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-nav {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 60px;
+            background-color: rgba(255, 255, 255, 0.7);
+            border: none;
+            font-size: 2rem;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            transition: background-color 0.2s ease;
+        }
+        .modal-nav:hover {
+            background-color: rgba(255, 255, 255, 0.9);
+        }
+        .modal-prev {
+            left: -70px;
+        }
+        .modal-next {
+            right: -70px;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">Deepfake Detection</a>
+    </div>
+</nav>
+
+<div class="container mt-5">
+    <h2 class="text-center">History Detail</h2>
+
+    <div class="mb-4 text-center">
+        <p><strong>Original Filename:</strong> {{ record.original_filename or 'N/A' }}</p>
+        <p><strong>Confidence:</strong> {{ record.confidence | round(2) }}</p>
+        <p class="{% if record.result == 'Fake' %}fake{% else %}real{% endif %}"><strong>{{ record.result }}</strong></p>
+    </div>
+
+    <div class="text-center mb-4">
+        <video width="480" height="auto" controls>
+            <source src="{{ preview_path }}" type="video/mp4">
+           Your browser does not support the video tag.
+        </video>
+    </div>
+
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="frames-tab" data-bs-toggle="tab" data-bs-target="#frames" type="button" role="tab">Frames</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="crops-tab" data-bs-toggle="tab" data-bs-target="#crops" type="button" role="tab">Cropped Faces</button>
+        </li>
+    </ul>
+    <div class="tab-content mt-3">
+        <div class="tab-pane fade show active scroll-row" id="frames" role="tabpanel">
+            {% for img in face_images %}
+                <img src="{{ img }}" onclick="openModal({{ loop.index0 }}, 'frames')">
+            {% endfor %}
+        </div>
+        <div class="tab-pane fade scroll-row" id="crops" role="tabpanel">
+            {% for img in crop_faces %}
+                <img src="{{ img }}" onclick="openModal({{ loop.index0 }}, 'crops')">
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="text-center">
+        <a href="{{ url_for('history') }}" class="btn btn-primary mt-4">Back to History</a>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body">
+                <button class="modal-nav modal-prev" onclick="prevImage()">&larr;</button>
+                <img id="modalImage" class="modal-img" src="">
+                <button class="modal-nav modal-next" onclick="nextImage()">&rarr;</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    const frames = {{ face_images|tojson }};
+    const crops = {{ crop_faces|tojson }};
+    let currentIndex = 0;
+    let currentList = [];
+
+    function openModal(index, type) {
+        currentList = (type === 'frames') ? frames : crops;
+        currentIndex = index;
+        document.getElementById('modalImage').src = currentList[currentIndex];
+        const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+        modal.show();
+    }
+
+    function nextImage() {
+        if (currentList.length === 0 || currentIndex >= currentList.length - 1) return;
+        currentIndex++;
+        document.getElementById('modalImage').src = currentList[currentIndex];
+    }
+
+    function prevImage() {
+        if (currentList.length === 0 || currentIndex <= 0) return;
+        currentIndex--;
+        document.getElementById('modalImage').src = currentList[currentIndex];
+    }
+
+    document.addEventListener('keydown', function (event) {
+    const modalShown = document.getElementById('imageModal').classList.contains('show');
+    if (!modalShown) return;
+
+    if (event.key === 'ArrowRight') {
+        nextImage();
+    } else if (event.key === 'ArrowLeft') {
+        prevImage();
+    }
+});
+</script>
+</body>
+</html>

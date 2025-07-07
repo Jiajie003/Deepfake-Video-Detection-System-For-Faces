@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deepfake Detection System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">Deepfake Detection</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto">
+                    {% if session.get('user') %}
+                        <li class="nav-item">
+                            <span class="nav-link">Hi, {{ session['user'] }}</span>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('auth') }}">Register</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('auth', action='login') }}">Login</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+    <h1 class="text-center">Welcome to the Deepfake Detection System</h1>
+    <p class="text-center">Upload a video to detect whether it contains deepfake content.</p>
+
+    <div class="card mx-auto" style="max-width: 600px;">
+        <div class="card-body">
+            <!-- 所有人都能看到上传表单 -->
+            <form action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="videoUpload" class="form-label">Upload Video</label>
+                    <input type="file" class="form-control" id="videoUpload" name="file" accept="video/*" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 mt-3">Analyze Video</button>
+            </form>
+
+            <!-- 登录用户才能看历史按钮；否则显示提示 -->
+            {% if session.get('user') %}
+                <a href="{{ url_for('history') }}" class="btn btn-outline-secondary w-100 mt-2">View My History</a>
+            {% else %}
+                <p class="text-center mt-2 text-muted">
+                    Login to save and view your scan history.
+                </p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html>
+
+<script>
+let clickedButton = null;
+
+document.querySelectorAll('button[type="submit"]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    clickedButton = btn;
+  });
+});
+
+document.querySelectorAll('form').forEach(form => {
+  form.addEventListener('submit', function () {
+    if (clickedButton) {
+      clickedButton.disabled = true;
+      clickedButton.innerText = "Processing...";
+    }
+  });
+});
+</script>

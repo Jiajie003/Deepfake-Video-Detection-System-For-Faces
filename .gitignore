@@ -1,0 +1,33 @@
+# Python 缓存
+__pycache__/
+*.pyc
+
+# 本地虚拟环境
+FYP_DeepFake/
+Lib/
+
+# 本地配置与敏感信息
+.env
+
+# 保留文件夹但忽略实际数据库
+# instance/users.db
+
+# 上传图片/视频
+static/uploads/
+
+# 忽略 frames 資料夾中的所有內容
+Train Model/frames/
+
+
+# VS Code 设置
+.vscode/
+
+# 其他临时目录
+tempreq/
+trash/
+dataset/
+templates/
+share/
+Scripts/
+models/
+ngrok.exe

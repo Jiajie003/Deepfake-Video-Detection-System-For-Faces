@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Scan History</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">Deepfake Detection</a>
+    </div>
+</nav>
+
+<div class="container mt-5">
+    <h3 class="text-center mb-4">My Scan History</h3>
+
+    {% if records %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Filename</th>
+                <th>Result</th>
+                <th>Confidence</th>
+            </tr>
+        </thead>
+        <!-- <tbody>
+            {% for r in records %}
+            <tr>
+                <td>{{ r.timestamp.strftime("%Y-%m-%d %H:%M:%S") }}</td>
+                <td>
+                    <video width="240" controls>
+                        <source src="{{ r.filename }}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </td>
+                <td class="{% if r.result == 'Fake' %}text-danger{% else %}text-success{% endif %}">
+                    <strong>{{ r.result }}</strong>
+                </td>
+                <td>{{ r.confidence | round(2) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody> -->
+        <tbody>
+            {% for r in records %}
+            <tr>
+                <td>{{ r.timestamp.strftime("%Y-%m-%d %H:%M:%S") }}</td>
+                <td>{{ r.original_filename or 'N/A' }}</td>
+                <td class="{% if r.result == 'Fake' %}text-danger{% else %}text-success{% endif %}">
+                    <strong>{{ r.result }}</strong>
+                </td>
+                <td>{{ r.confidence | round(2) }}</td>
+                <td>
+                    <a href="{{ url_for('history_detail', history_id=r.id) }}" class="btn btn-sm btn-primary">View</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="text-center text-muted">No scan history yet.</p>
+    {% endif %}
+
+    <div class="text-center mt-4">
+        <a href="{{ url_for('home') }}" class="btn btn-primary">Back to Home</a>
+    </div>
+</div>
+</body>
+</html>

@@ -109,7 +109,7 @@ def get_model():
     if model is None:
         debug_log("📦 Loading model...")
         m = CNN_LSTM().to(device)
-        m.load_state_dict(torch.load("Train Model/cnn_lstm_deepfake_self_train.pth", map_location=device))
+        m.load_state_dict(torch.load("Train Model/best_unbalanced_model.pth", map_location=device))
         m.eval()
         model = m
         debug_log("✅ Model loaded successfully.")

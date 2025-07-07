@@ -23,6 +23,7 @@ FYP_DeepFake/
 │ └── Train_And_Eval_Unbalanced.py
 ├── create_db.py
 ├── app.py
+├── check_gpu_available.py        ← utility to verify CUDA/PyTorch setup
 ├── .env
 ├── .gitignore
 └── requirements.txt
@@ -34,8 +35,9 @@ FYP_DeepFake/
 
 - Python 3.8 or higher  
 - Git  
-- Google account (to request and download Celeb-DF dataset)  
-- (Optional) `venv` or `conda` for environment isolation
+- Google account (to request and download Celeb-DF dataset)
+- NVIDIA GPU + CUDA Toolkit (optional, for GPU acceleration)
+- (Optional) venv or conda for environment isolation
 
 ---
 
@@ -43,7 +45,7 @@ FYP_DeepFake/
 
 1. Visit the [Celeb-DF v2 README](https://github.com/yuezunli/celeb-deepfakeforensics/blob/master/Celeb-DF-v1/README.md).  
 2. Scroll down, open the request form, and submit it to receive the Google Drive link.  
-3. Download and extract the dataset into the project root under `dataset/`.
+3. Download and extract the dataset into the project root under dataset/.
 
 ---
 
@@ -60,6 +62,46 @@ source env/bin/activate
 
 pip install -r requirements.txt
 ```
+---
+## 🔍 Verify GPU & CUDA Setup
+A small script check_gpu_available.py is provided to confirm your PyTorch/CUDA installation:
+```bash
+python check_gpu_available.py
+```
+-  ✅ If you see “CUDA is available!”, you can train on GPU.
+-  ❌ Otherwise, run:
+```bash
+nvidia-smi
+```
+-  to check your driver’s CUDA version (e.g. “CUDA Version: 12.9”).
+
+
+## ⚙️ Choosing the Right CUDA Build for PyTorch
+1. Check driver’s CUDA version
+```bash
+nvidia-smi
+```
+
+2. Install matching PyTorch wheel
+-  For CUDA ≥ 12.1:
+```bash
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+```
+-  Otherwise, use CUDA 11.8 build:
+```bash
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+```
+
+3. Re-run the GPU check
+```bash
+python check_gpu_available.py
+```
+
+Verify that the printed PyTorch version includes +cu118 or +cu121 and that CUDA is available!
+
+
+---
+
 
 
 
@@ -70,7 +112,6 @@ cd Train_Model
 python extract_face_frames_224x224_20frames.py \
   --input ../dataset/ \
   --output ./frames/
-
 ```
 
 
@@ -108,7 +149,7 @@ python Train_And_Eval_Unbalanced.py \
   --val_json self_train/val_split.json \
   --save_model best_unbalanced_model.pth
 ```
-
+---
 ## 🌐 Running the Web App
 1. Initialize the database
 ```bash
